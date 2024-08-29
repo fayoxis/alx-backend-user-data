@@ -67,11 +67,12 @@ def main():
         i = 0
         while i < len(rows):
             row = rows[i]
-            record = map(
-                lambda x: '{}={}'.format(x[0], x[1]),
-                zip(columns, row),
-            )
-            msg = '{};'.format('; '.join(list(record)))
+            record = []
+            j = 0
+            while j < len(columns):
+                record.append('{}={}'.format(columns[j], row[j]))
+                j += 1
+            msg = '{};'.format('; '.join(record))
             args = ("user_data", logging.INFO, None, None, msg, None, None)
             log_record = logging.LogRecord(*args)
             info_logger.handle(log_record)
