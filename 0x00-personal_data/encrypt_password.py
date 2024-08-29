@@ -4,9 +4,9 @@
 This module provides functionality for password encryption.
 """
 
-from bcrypt import hashpw, gensalt, checkpw
+import bcrypt
 
-def encrypt_password(plain_text: str) -> bytes:
+def hash_password(password: str) -> bytes:
     """
     Generates a salted hash of the provided password.
     
@@ -16,9 +16,9 @@ def encrypt_password(plain_text: str) -> bytes:
     Returns:
         bytes: The salted hash of the password.
     """
-    return hashpw(plain_text.encode('utf-8'), gensalt())
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
-def verify_password(stored_hash: bytes, candidate_password: str) -> bool:
+def is_valid(hashed_password: bytes, password: str) -> bool:
     """
     Verifies if a candidate password matches the stored hash.
     
@@ -29,4 +29,4 @@ def verify_password(stored_hash: bytes, candidate_password: str) -> bool:
     Returns:
         bool: True if the password matches the hash, False otherwise.
     """
-    return checkpw(candidate_password.encode('utf-8'), stored_hash)
+      return bcrypt.checkpw(password.encode('utf-8'), hashed_password)
