@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""A module for filtering logs.
+"""
+Module for filtering and logging sensitive data.
+Provides functions to redact PII, interact with a database,
+and log user information securely. Includes custom formatter.
 """
 import os
+import mysql.connector
 import re
 import logging
-import mysql.connector
 from typing import List
 
 
@@ -18,14 +21,20 @@ PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 def filter_datum(
         fields: List[str], redaction: str, message: str, separator: str,
         ) -> str:
-    """Filters a log line.
+    """
+    Redacts specified fields in a log message.
+    Takes fields to redact, redaction string, original message,
+    and field separator. Returns filtered message.
     """
     extract, replace = (patterns["extract"], patterns["replace"])
     return re.sub(extract(fields, separator), replace(redaction), message)
 
 
 def get_logger() -> logging.Logger:
-    """Creates a new logger for user data.
+    """
+    Sets up and returns a configured logger for user data.
+    Includes a custom formatter to redact sensitive information.
+    Uses StreamHandler for output.
     """
     logger = logging.getLogger("user_data")
     stream_handler = logging.StreamHandler()
@@ -37,7 +46,10 @@ def get_logger() -> logging.Logger:
 
 
 def get_db() -> mysql.connector.connection.MySQLConnection:
-    """Creates a connector to a database.
+    """
+    Establishes and returns a connection to the MySQL database.
+    Uses environment variables for connection details like host,
+    database name, username, and password.
     """
     db_host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
     db_name = os.getenv("PERSONAL_DATA_DB_NAME", "")
@@ -54,8 +66,7 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
 
 
 def main():
-    """Logs the information about user records in a table.
-    """
+    """Logs user data from the database, redacting sensitive information."""
     fields = "name,email,phone,ssn,password,ip,last_login,user_agent"
     columns = fields.split(',')
     query = "SELECT {} FROM users;".format(fields)
@@ -64,7 +75,9 @@ def main():
     with connection.cursor() as cursor:
         cursor.execute(query)
         rows = cursor.fetchall()
-        for row in rows:
+        row_idx = 0
+        while row_idx < len(rows):
+            row = rows[row_idx]
             record = map(
                 lambda x: '{}={}'.format(x[0], x[1]),
                 zip(columns, row),
@@ -73,10 +86,14 @@ def main():
             args = ("user_data", logging.INFO, None, None, msg, None, None)
             log_record = logging.LogRecord(*args)
             info_logger.handle(log_record)
+            row_idx += 1
 
 
 class RedactingFormatter(logging.Formatter):
-    """ Redacting Formatter class
+    """
+    Custom logging formatter that redacts specified fields.
+    Inherits fromlogging.Formatter and overrides the format
+    method to apply redaction.
     """
 
     REDACTION = "***"
@@ -89,12 +106,15 @@ class RedactingFormatter(logging.Formatter):
         self.fields = fields
 
     def format(self, record: logging.LogRecord) -> str:
-        """formats a LogRecord.
+        """
+        Formats the log record, applying redaction to specified fields.
+        Takes a LogRecord as input and returns a formatted
+        and redacted log message string.
         """
         msg = super(RedactingFormatter, self).format(record)
         txt = filter_datum(self.fields, self.REDACTION, msg, self.SEPARATOR)
         return txt
 
 
-if __name__ == "__main__":
+while __name__ == "__main__":
     main()
