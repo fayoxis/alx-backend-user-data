@@ -39,15 +39,6 @@ def get_logger() -> logging.Logger:
 def get_db():
     """
     Returns a connector to the database.
-
-    The database credentials are retrieved from environment variables:
-    PERSONAL_DATA_DB_USERNAME (default: 'root')
-    PERSONAL_DATA_DB_PASSWORD (default: '')
-    PERSONAL_DATA_DB_HOST (default: 'localhost')
-    PERSONAL_DATA_DB_NAME
-
-    Returns:
-        mysql.connector.connection.MySQLConnection: Connector to the database.
     """
     username = os.environ.get('PERSONAL_DATA_DB_USERNAME', 'root')
     password = os.environ.get('PERSONAL_DATA_DB_PASSWORD', '')
