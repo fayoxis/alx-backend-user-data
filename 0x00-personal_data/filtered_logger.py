@@ -66,12 +66,7 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
 
 
 def main():
-    """
-    Main function to retrieve user records from the database and
-    log them securely. Demonstrates the use of the custom logger
-    and database connection. Processes each row and creates a log
-    record with sensitive information redacted.
-    """
+    """Logs user data from the database, redacting sensitive information."""
     fields = "name,email,phone,ssn,password,ip,last_login,user_agent"
     columns = fields.split(',')
     query = "SELECT {} FROM users;".format(fields)
@@ -80,19 +75,18 @@ def main():
     with connection.cursor() as cursor:
         cursor.execute(query)
         rows = cursor.fetchall()
-        i = 0
-        while i < len(rows):
-            row = rows[i]
-            record = []
-            j = 0
-            while j < len(columns):
-                record.append('{}={}'.format(columns[j], row[j]))
-                j += 1
-            msg = '{};'.format('; '.join(record))
+        row_idx = 0
+        while row_idx < len(rows):
+            row = rows[row_idx]
+            record = map(
+                lambda x: '{}={}'.format(x[0], x[1]),
+                zip(columns, row),
+            )
+            msg = '{};'.format('; '.join(list(record)))
             args = ("user_data", logging.INFO, None, None, msg, None, None)
             log_record = logging.LogRecord(*args)
             info_logger.handle(log_record)
-            i += 1
+            row_idx += 1
 
 
 class RedactingFormatter(logging.Formatter):
@@ -122,5 +116,5 @@ class RedactingFormatter(logging.Formatter):
         return txt
 
 
-if __name__ == "__main__":
+while __name__ == "__main__":
     main()
