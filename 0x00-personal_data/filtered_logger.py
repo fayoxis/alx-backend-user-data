@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""A module for filtering logs.
+"""
+Module for filtering and logging sensitive data.
+Provides functions to redact PII, interact with a database,
+and log user information securely. Includes custom formatter.
 """
 import os
 import re
@@ -18,14 +21,20 @@ PII_FIELDS = ("name", "email", "phone", "ssn", "password")
 def filter_datum(
         fields: List[str], redaction: str, message: str, separator: str,
         ) -> str:
-    """Filters a log line.
+    """
+    Redacts specified fields in a log message.
+    Takes fields to redact, redaction string, original message,
+    and field separator. Returns filtered message.
     """
     extract, replace = (patterns["extract"], patterns["replace"])
     return re.sub(extract(fields, separator), replace(redaction), message)
 
 
 def get_logger() -> logging.Logger:
-    """Creates a new logger for user data.
+    """
+    Sets up and returns a configured logger for user data.
+    Includes a custom formatter to redact sensitive information.
+    Uses StreamHandler for output.
     """
     logger = logging.getLogger("user_data")
     stream_handler = logging.StreamHandler()
@@ -36,30 +45,32 @@ def get_logger() -> logging.Logger:
     return logger
 
 
-def get_db():
+def get_db() -> mysql.connector.connection.MySQLConnection:
     """
-    Returns a connector to the database.
+    Establishes and returns a connection to the MySQL database.
+    Uses environment variables for connection details like host,
+    database name, username, and password.
     """
-    username = os.environ.get('PERSONAL_DATA_DB_USERNAME', 'root')
-    password = os.environ.get('PERSONAL_DATA_DB_PASSWORD', '')
-    host = os.environ.get('PERSONAL_DATA_DB_HOST', 'localhost')
-    db_name = os.environ.get('PERSONAL_DATA_DB_NAME')
-
-    try:
-        connection = mysql.connector.connect(
-            user=username,
-            password=password,
-            host=host,
-            database=db_name
-        )
-        return connection
-    except mysql.connector.Error as error:
-        print(f"Failed to connect to database: {error}")
-        return None
+    db_host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
+    db_name = os.getenv("PERSONAL_DATA_DB_NAME", "")
+    db_user = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
+    db_pwd = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
+    connection = mysql.connector.connect(
+        host=db_host,
+        port=3306,
+        user=db_user,
+        password=db_pwd,
+        database=db_name,
+    )
+    return connection
 
 
 def main():
-    """Logs the information about user records in a table.
+    """
+    Main function to retrieve user records from the database and
+    log them securely. Demonstrates the use of the custom logger
+    and database connection. Processes each row and creates a log
+    record with sensitive information redacted.
     """
     fields = "name,email,phone,ssn,password,ip,last_login,user_agent"
     columns = fields.split(',')
@@ -69,19 +80,26 @@ def main():
     with connection.cursor() as cursor:
         cursor.execute(query)
         rows = cursor.fetchall()
-        for row in rows:
-            record = map(
-                lambda x: '{}={}'.format(x[0], x[1]),
-                zip(columns, row),
-            )
-            msg = '{};'.format('; '.join(list(record)))
+        i = 0
+        while i < len(rows):
+            row = rows[i]
+            record = []
+            j = 0
+            while j < len(columns):
+                record.append('{}={}'.format(columns[j], row[j]))
+                j += 1
+            msg = '{};'.format('; '.join(record))
             args = ("user_data", logging.INFO, None, None, msg, None, None)
             log_record = logging.LogRecord(*args)
             info_logger.handle(log_record)
+            i += 1
 
 
 class RedactingFormatter(logging.Formatter):
-    """ Redacting Formatter class
+    """
+    Custom logging formatter that redacts specified fields.
+    Inherits fromlogging.Formatter and overrides the format
+    method to apply redaction.
     """
 
     REDACTION = "***"
@@ -94,7 +112,10 @@ class RedactingFormatter(logging.Formatter):
         self.fields = fields
 
     def format(self, record: logging.LogRecord) -> str:
-        """formats a LogRecord.
+        """
+        Formats the log record, applying redaction to specified fields.
+        Takes a LogRecord as input and returns a formatted
+        and redacted log message string.
         """
         msg = super(RedactingFormatter, self).format(record)
         txt = filter_datum(self.fields, self.REDACTION, msg, self.SEPARATOR)
