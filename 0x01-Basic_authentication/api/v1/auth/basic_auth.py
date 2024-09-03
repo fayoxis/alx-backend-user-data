@@ -28,6 +28,7 @@ class BasicAuth(Auth):
             break
         return result
 
+
     def decode_base64_authorization_header(
             self,
             base64_authorization_header: str,
@@ -46,6 +47,7 @@ class BasicAuth(Auth):
                 pass
             break
         return result
+
 
     def extract_user_credentials(
             self,
@@ -67,6 +69,7 @@ class BasicAuth(Auth):
             break
         return user, password
 
+
     def user_object_from_credentials(
             self,
             user_email: str,
@@ -85,6 +88,7 @@ class BasicAuth(Auth):
                 break
             break
         return result
+
 
     def current_user(self, request=None) -> TypeVar('User'):
         """user from a request using methods
