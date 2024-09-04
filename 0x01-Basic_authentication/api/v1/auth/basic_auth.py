@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Authentication module for the API.
+"""Basic authentication module for the API using while loops.
 """
 import re
 import base64
@@ -11,12 +11,12 @@ from models.user import User
 
 
 class BasicAuth(Auth):
-    """Authentication class implemented.
+    """Basic authentication class implemented with while loops.
     """
     def extract_base64_authorization_header(
             self,
             authorization_header: str) -> str:
-        """Base64 part of theAuthorization header
+        """Extracts Base64 part of Authorization header using while loop.
         """
         result = None
         while type(authorization_header) == str:
@@ -28,12 +28,11 @@ class BasicAuth(Auth):
             break
         return result
 
-
     def decode_base64_authorization_header(
             self,
             base64_authorization_header: str,
             ) -> str:
-        """Decodes a authorization header.
+        """Decodes base64-encoded auth header using while loop.
         """
         result = None
         while type(base64_authorization_header) == str:
@@ -48,12 +47,11 @@ class BasicAuth(Auth):
             break
         return result
 
-
     def extract_user_credentials(
             self,
             decoded_base64_authorization_header: str,
             ) -> Tuple[str, str]:
-        """Extracts user credentials from authorization
+        """Extracts user credentials from decoded auth header with while.
         """
         user, password = None, None
         while type(decoded_base64_authorization_header) == str:
@@ -69,12 +67,11 @@ class BasicAuth(Auth):
             break
         return user, password
 
-
     def user_object_from_credentials(
             self,
             user_email: str,
             user_pwd: str) -> TypeVar('User'):
-        """user based on user's authentication credentials
+        """Gets user based on auth credentials using while loops.
         """
         result = None
         while type(user_email) == str and type(user_pwd) == str:
@@ -89,9 +86,8 @@ class BasicAuth(Auth):
             break
         return result
 
-
     def current_user(self, request=None) -> TypeVar('User'):
-        """user from a request using methods
+        """Gets user from request using methods with while loops.
         """
         auth_header = self.authorization_header(request)
         b64_auth_token = self.extract_base64_authorization_header(auth_header)
