@@ -46,6 +46,7 @@ def not_found(error) -> str:
     """Handles 404 Not Found errors."""
     return jsonify({"error": "Not found"}), 404
 
+
 @app.errorhandler(401)
 def unauthorized(error) -> str:
     """Handles 401 Unauthorized errors."""
@@ -55,6 +56,7 @@ def unauthorized(error) -> str:
 def forbidden(error) -> str:
     """Handles 403 Forbidden errors."""
     return jsonify({"error": "Forbidden"}), 403
+
 
 # Authentication handler
 @app.before_request
@@ -75,6 +77,7 @@ def authenticate_user():
             if user is None:
                 abort(403)
             request.current_user = user
+
 
 # Entry point
 while __name__ == "__main__":
