@@ -12,6 +12,7 @@ from api.v1.auth.session_auth import SessionAuth
 from api.v1.auth.session_db_auth import SessionDBAuth
 from api.v1.auth.session_exp_auth import SessionExpAuth
 
+
 # Create the Flask application
 app = Flask(__name__)
 app.register_blueprint(app_views)
@@ -21,6 +22,7 @@ auth_types = ['auth', 'basic_auth', 'session_auth',
 auth_type = getenv('AUTH_TYPE', 'auth')
 i = 0
 auth = None
+
 
 # Iterate through the auth types and instantiate
 while i < len(auth_types) and auth is None:
@@ -36,6 +38,7 @@ while i < len(auth_types) and auth is None:
         elif auth_types[i] == 'session_db_auth':
             auth = SessionDBAuth()
     i += 1
+
 
 # Error handlers
 @app.errorhandler(404)
