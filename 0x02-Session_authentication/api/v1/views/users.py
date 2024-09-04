@@ -17,7 +17,8 @@ def view_all_users() -> str:
     return jsonify(all_users)
 
 
-@app_views.route('/users/<user_id>', methods=['GET'], strict_slashes=False)
+@app_views.route('/users/<user_id>', methods=['GET'],
+                 strict_slashes=False)
 def view_one_user(user_id: str = None) -> str:
     """Retrieve a specific User object in JSON format.
     If the user_id is 'me', return the current user.
@@ -45,7 +46,8 @@ def view_one_user(user_id: str = None) -> str:
                 keep_going = False
 
 
-@app_views.route('/users/<user_id>', methods=['DELETE'], strict_slashes=False)
+@app_views.route('/users/<user_id>', methods=['DELETE'],
+                 strict_slashes=False)
 def delete_user(user_id: str = None) -> str:
     """Delete a specific User object.
     If the user_id is not found, return a 404 error.
@@ -106,7 +108,8 @@ def create_user() -> str:
     return jsonify({'error': error_msg}), 400
 
 
-@app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
+@app_views.route('/users/<user_id>', methods=['PUT'],
+                 strict_slashes=False)
 def update_user(user_id: str = None) -> str:
     """Update a specific User object.
     The request body should contain the 'first_name' and/or 'last_name'
