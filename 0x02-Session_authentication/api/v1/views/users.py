@@ -5,7 +5,8 @@ from flask import abort, jsonify, request
 from models.user import User
 
 
-@app_views.route('/users', methods=['GET'], strict_slashes=False)
+@app_views.route('/users', methods=['GET'],
+                 strict_slashes=False)
 def view_all_users() -> str:
     """Retrieve a list of all User objects in JSON format."""
     all_users = []
@@ -69,7 +70,8 @@ def delete_user(user_id: str = None) -> str:
                 keep_going = False
 
 
-@app_views.route('/users', methods=['POST'], strict_slashes=False)
+@app_views.route('/users', methods=['POST'],
+                 strict_slashes=False)
 def create_user() -> str:
     """Create a new User object.
     The request body should contain the 'email' and 'password' fields.
