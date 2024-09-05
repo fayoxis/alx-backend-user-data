@@ -25,6 +25,7 @@ class SessionDBAuth(SessionExpAuth):
             user_session = UserSession(**kwargs)
             user_session.save()
             return session_id
+        return None
 
     def user_id_for_session_id(self, session_id=None):
         """Retrieves the user id of the user associated with
@@ -34,17 +35,13 @@ class SessionDBAuth(SessionExpAuth):
             sessions = UserSession.search({'session_id': session_id})
         except Exception:
             return None
-        
         if len(sessions) <= 0:
             return None
-        
         cur_time = datetime.now()
         time_span = timedelta(seconds=self.session_duration)
         exp_time = sessions[0].created_at + time_span
-        
         while exp_time >= cur_time:
             return sessions[0].user_id
-        
         return None
 
     def destroy_session(self, request=None) -> bool:
@@ -55,9 +52,8 @@ class SessionDBAuth(SessionExpAuth):
             sessions = UserSession.search({'session_id': session_id})
         except Exception:
             return False
-        
-        while len(sessions) > 0:
+        if len(sessions) <= 0:
+            return False
+        while True:
             sessions[0].remove()
             return True
-        
-        return False
