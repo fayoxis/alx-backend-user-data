@@ -1,16 +1,16 @@
-#!/usr/bin/env python3
-"""User module.
+"""User module for authentication and user management.
 """
 import hashlib
 from models.base import Base
 
 
 class User(Base):
-    """User class.
+    """User class for authentication and user management.
     """
 
     def __init__(self, *args: list, **kwargs: dict):
-        """Initialize a User instance.
+        """Initialize a User instance with email, password,
+        first name, and last name.
         """
         super().__init__(*args, **kwargs)
         self.email = kwargs.get('email')
@@ -20,14 +20,12 @@ class User(Base):
 
     @property
     def password(self) -> str:
-        """Getter of the password.
-        """
+        """Get the hashed password."""
         return self._password
 
     @password.setter
     def password(self, pwd: str):
-        """Setter of a new password: encrypt in SHA256.
-
+        """Set a new password by hashing it with SHA256.
         WARNING: Use a better password hashing algorithm like argon2
         or bcrypt in real-world projects.
         """
@@ -37,7 +35,8 @@ class User(Base):
             self._password = hashlib.sha256(pwd.encode()).hexdigest().lower()
 
     def is_valid_password(self, pwd: str) -> bool:
-        """Validate a password.
+        """Check if the provided password matches
+        the stored hashed password.
         """
         if pwd is None or type(pwd) is not str:
             return False
@@ -47,7 +46,8 @@ class User(Base):
         return hashlib.sha256(pwd_e).hexdigest().lower() == self.password
 
     def display_name(self) -> str:
-        """Display User name based on email/first_name/last_name.
+        """Generate a display name for the user
+        based on available information.
         """
         if self.email is None and self.first_name is None \
                 and self.last_name is None:
