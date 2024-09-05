@@ -1,8 +1,11 @@
-class SessionDBAuth(SessionExpAuth):
-    """Session authentication class with expiration and
-    storage support. Manages user sessions, including
-    creation, retrieval, and destruction.
-    """
+#!/usr/bin/env python3
+"""Session authentication with expiration
+and storage support for the API."""
+from flask import request
+from datetime import datetime, timedelta
+
+from models.user_session import UserSession
+from .session_exp_auth import SessionExpAuth
 
     def create_session(self, user_id=None) -> str:
         """Generate and store a new session ID for the user.
