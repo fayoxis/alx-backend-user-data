@@ -25,26 +25,26 @@ def view_one_user(user_id: str = None) -> str:
       - User object JSON represented.
       - 404 if the User ID doesn't exist.
     """
-    condition = True
-    while condition:
+    flag = True
+    while flag:
         if user_id is None:
             abort(404)
-            condition = False
+            flag = False
         elif user_id == 'me':
             if request.current_user is None:
                 abort(404)
-                condition = False
+                flag = False
             else:
                 return jsonify(request.current_user.to_json())
-                condition = False
+                flag = False
         else:
             user = User.get(user_id)
             if user is None:
                 abort(404)
-                condition = False
+                flag = False
             else:
                 return jsonify(user.to_json())
-                condition = False
+                flag = False
 
 
 @app_views.route('/users/<user_id>', methods=['DELETE'], strict_slashes=False)
@@ -56,20 +56,20 @@ def delete_user(user_id: str = None) -> str:
       - empty JSON is the User has been correctly deleted.
       - 404 if the User ID doesn't exist.
     """
-    condition = True
-    while condition:
+    flag = True
+    while flag:
         if user_id is None:
             abort(404)
-            condition = False
+            flag = False
         else:
             user = User.get(user_id)
             if user is None:
                 abort(404)
-                condition = False
+                flag = False
             else:
                 user.remove()
                 return jsonify({}), 200
-                condition = False
+                flag = False
 
 
 @app_views.route('/users', methods=['POST'], strict_slashes=False)
@@ -98,7 +98,7 @@ def create_user() -> str:
     while error_msg is None and rj.get("password", "") == "":
         error_msg = "password missing"
         break
-    if error_msg is None:
+    while error_msg is None:
         try:
             user = User()
             user.email = rj.get("email")
@@ -109,6 +109,7 @@ def create_user() -> str:
             return jsonify(user.to_json()), 201
         except Exception as e:
             error_msg = "Can't create User: {}".format(e)
+            break
     return jsonify({'error': error_msg}), 400
 
 
@@ -125,16 +126,16 @@ def update_user(user_id: str = None) -> str:
       - 404 if the User ID doesn't exist.
       - 400 if can't update the User.
     """
-    condition = True
-    while condition:
+    flag = True
+    while flag:
         if user_id is None:
             abort(404)
-            condition = False
+            flag = False
         else:
             user = User.get(user_id)
             if user is None:
                 abort(404)
-                condition = False
+                flag = False
             else:
                 rj = None
                 try:
@@ -143,11 +144,12 @@ def update_user(user_id: str = None) -> str:
                     rj = None
                 if rj is None:
                     return jsonify({'error': "Wrong format"}), 400
-                    condition = False
-                if rj.get('first_name') is not None:
-                    user.first_name = rj.get('first_name')
-                if rj.get('last_name') is not None:
-                    user.last_name = rj.get('last_name')
-                user.save()
-                return jsonify(user.to_json()), 200
-                condition = False
+                    flag = False
+                else:
+                    if rj.get('first_name') is not None:
+                        user.first_name = rj.get('first_name')
+                    if rj.get('last_name') is not None:
+                        user.last_name = rj.get('last_name')
+                    user.save()
+                    return jsonify(user.to_json()), 200
+                    flag = False
