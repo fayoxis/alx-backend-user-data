@@ -12,6 +12,7 @@ from api.v1.auth.session_auth import SessionAuth
 from api.v1.auth.session_db_auth import SessionDBAuth
 from api.v1.auth.session_exp_auth import SessionExpAuth
 
+
 # Create the Flask application
 app = Flask(__name__)
 app.register_blueprint(app_views)
@@ -22,7 +23,8 @@ auth_type = getenv('AUTH_TYPE', 'auth')
 i = 0
 auth = None
 
-# Iterate through the auth types and instantiate the appropriate auth class
+
+# Iterate through the auth types and instantiate
 while i < len(auth_types) and auth is None:
     if auth_type == auth_types[i]:
         if auth_types[i] == 'auth':
@@ -37,21 +39,25 @@ while i < len(auth_types) and auth is None:
             auth = SessionDBAuth()
     i += 1
 
+
 # Error handlers
 @app.errorhandler(404)
 def not_found(error) -> str:
     """Handles 404 Not Found errors."""
     return jsonify({"error": "Not found"}), 404
 
+
 @app.errorhandler(401)
 def unauthorized(error) -> str:
     """Handles 401 Unauthorized errors."""
     return jsonify({"error": "Unauthorized"}), 401
 
+
 @app.errorhandler(403)
 def forbidden(error) -> str:
     """Handles 403 Forbidden errors."""
     return jsonify({"error": "Forbidden"}), 403
+
 
 # Authentication handler
 @app.before_request
@@ -72,6 +78,7 @@ def authenticate_user():
             if user is None:
                 abort(403)
             request.current_user = user
+
 
 # Entry point
 if __name__ == "__main__":
