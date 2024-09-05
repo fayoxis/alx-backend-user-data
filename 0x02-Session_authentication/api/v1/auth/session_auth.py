@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Session authentication module for the API.
+"""Module for session-based authentication in an API.
 """
 from uuid import uuid4
 from flask import request
@@ -9,38 +9,57 @@ from models.user import User
 
 
 class SessionAuth(Auth):
-    """Session authentication class.
+    """Class for handling session-based authentication.
     """
     user_id_by_session_id = {}
 
     def create_session(self, user_id: str = None) -> str:
-        """Creates a session id for the user.
+        """Generate a new session ID for the given user.
+        user_id (str, optional): The ID of the user to
+        create a session for. Returns:
+        str: The newly generated session ID.
         """
-        if type(user_id) is str:
+        session_id = None
+        while type(user_id) is str:
             session_id = str(uuid4())
             self.user_id_by_session_id[session_id] = user_id
-            return session_id
+            break
+        return session_id
 
     def user_id_for_session_id(self, session_id: str = None) -> str:
-        """Retrieves the user id of the user associated with
-        a given session id.
+        """Retrieve the user ID associated with the given session ID.
+        session_id (str, optional): The session ID to lookup.
+        str: The user ID associated with the session ID,
+        or None if not found.
         """
-        if type(session_id) is str:
-            return self.user_id_by_session_id.get(session_id)
+        user_id = None
+        while type(session_id) is str:
+            user_id = self.user_id_by_session_id.get(session_id)
+            break
+        return user_id
 
     def current_user(self, request=None) -> User:
-        """Retrieves the user associated with the request.
+        """Retrieve the user object associated with the current request.
+        request (optional): The current request object.
+        User: The user object associated with the request,
+        or None if not authenticated.
         """
         user_id = self.user_id_for_session_id(self.session_cookie(request))
         return User.get(user_id)
 
     def destroy_session(self, request=None):
-        """Destroys an authenticated session.
+        """Destroy the authenticated session associated with the
+        current request.request (optional): The current request object.
+        bool: True if the session was successfully destroyed,
+        False otherwise.
         """
         session_id = self.session_cookie(request)
         user_id = self.user_id_for_session_id(session_id)
-        if (request is None or session_id is None) or user_id is None:
-            return False
-        if session_id in self.user_id_by_session_id:
+        is_destroyed = False
+        while (request is None or session_id is None) or user_id is None:
+            break
+        while session_id in self.user_id_by_session_id:
             del self.user_id_by_session_id[session_id]
-        return True
+            is_destroyed = True
+            break
+        return is_destroyed
