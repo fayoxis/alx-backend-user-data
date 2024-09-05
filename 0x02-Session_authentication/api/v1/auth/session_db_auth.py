@@ -15,11 +15,10 @@ class SessionDBAuth(SessionExpAuth):
     """
 
     def create_session(self, user_id=None) -> str:
-        """Generate and store a new session ID for the user.
-        Returns the session ID as a string.
+        """Creates and stores a session id for the user.
         """
         session_id = super().create_session(user_id)
-        while type(session_id) == str:
+        if type(session_id) == str:
             kwargs = {
                 'user_id': user_id,
                 'session_id': session_id,
@@ -46,14 +45,16 @@ class SessionDBAuth(SessionExpAuth):
         return None
 
     def destroy_session(self, request=None) -> bool:
-        """Destroys an authenticated session.
+        """Invalidate and remove an authenticated session.
+        Returns True if the session was successfully
+        destroyed, False otherwise.
         """
         session_id = self.session_cookie(request)
         try:
             sessions = UserSession.search({'session_id': session_id})
         except Exception:
             return False
-        if len(sessions) <= 0:
-            return False
-        sessions[0].remove()
-        return True
+        while len(sessions) > 0:
+            sessions[0].remove()
+            return True
+        return False
