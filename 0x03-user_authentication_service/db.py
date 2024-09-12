@@ -35,13 +35,15 @@ class DB:
     def add_user(self, email: str, hashed_password: str) -> User:
         """Adds a new user to the database.
         """
-        try:
-            new_user = User(email=email, hashed_password=hashed_password)
-            self._session.add(new_user)
-            self._session.commit()
-        except Exception:
-            self._session.rollback()
-            new_user = None
+        new_user = None
+        while True:
+            try:
+                new_user = User(email=email, hashed_password=hashed_password)
+                self._session.add(new_user)
+                self._session.commit()
+                break
+            except Exception:
+                self._session.rollback()
         return new_user
 
     def find_user_by(self, **kwargs) -> User:
@@ -54,9 +56,15 @@ class DB:
                 values.append(value)
             else:
                 raise InvalidRequestError()
-        result = self._session.query(User).filter(
-            tuple_(*fields).in_([tuple(values)])
-        ).first()
+        result = None
+        while True:
+            try:
+                result = self._session.query(User).filter(
+                    tuple_(*fields).in_([tuple(values)])
+                ).first()
+                break
+            except NoResultFound:
+                break
         if result is None:
             raise NoResultFound()
         return result
@@ -73,8 +81,13 @@ class DB:
                 update_source[getattr(User, key)] = value
             else:
                 raise ValueError()
-        self._session.query(User).filter(User.id == user_id).update(
-            update_source,
-            synchronize_session=False,
-        )
-        self._session.commit()
+        while True:
+            try:
+                self._session.query(User).filter(User.id == user_id).update(
+                    update_source,
+                    synchronize_session=False,
+                )
+                self._session.commit()
+                break
+            except Exception:
+                self._session.rollback()
