@@ -3,12 +3,10 @@
 """
 import requests
 
-
 EMAIL = "guillaume@holberton.io"
 PASSWD = "b4l0u"
 NEW_PASSWD = "t4rt1fl3tt3"
 BASE_URL = "http://0.0.0.0:5000"
-
 
 def register_user(email: str, password: str) -> None:
     """Tests registering a user.
@@ -25,7 +23,6 @@ def register_user(email: str, password: str) -> None:
     assert res.status_code == 400
     assert res.json() == {"message": "email already registered"}
 
-
 def log_in_wrong_password(email: str, password: str) -> None:
     """Tests logging in with a wrong password.
     """
@@ -36,7 +33,6 @@ def log_in_wrong_password(email: str, password: str) -> None:
     }
     res = requests.post(url, data=body)
     assert res.status_code == 401
-
 
 def log_in(email: str, password: str) -> str:
     """Tests logging in.
@@ -51,14 +47,12 @@ def log_in(email: str, password: str) -> str:
     assert res.json() == {"email": email, "message": "logged in"}
     return res.cookies.get('session_id')
 
-
 def profile_unlogged() -> None:
     """Tests retrieving profile information whilst logged out.
     """
     url = "{}/profile".format(BASE_URL)
     res = requests.get(url)
     assert res.status_code == 403
-
 
 def profile_logged(session_id: str) -> None:
     """Tests retrieving profile information whilst logged in.
@@ -71,7 +65,6 @@ def profile_logged(session_id: str) -> None:
     assert res.status_code == 200
     assert "email" in res.json()
 
-
 def log_out(session_id: str) -> None:
     """Tests logging out of a session.
     """
@@ -82,7 +75,6 @@ def log_out(session_id: str) -> None:
     res = requests.delete(url, cookies=req_cookies)
     assert res.status_code == 200
     assert res.json() == {"message": "Bienvenue"}
-
 
 def reset_password_token(email: str) -> str:
     """Tests requesting a password reset.
@@ -95,7 +87,6 @@ def reset_password_token(email: str) -> str:
     assert res.json()["email"] == email
     assert "reset_token" in res.json()
     return res.json().get('reset_token')
-
 
 def update_password(email: str, reset_token: str, new_password: str) -> None:
     """Tests updating a user's password.
@@ -110,14 +101,25 @@ def update_password(email: str, reset_token: str, new_password: str) -> None:
     assert res.status_code == 200
     assert res.json() == {"email": email, "message": "Password updated"}
 
-
 if __name__ == "__main__":
-    register_user(EMAIL, PASSWD)
-    log_in_wrong_password(EMAIL, NEW_PASSWD)
-    profile_unlogged()
-    session_id = log_in(EMAIL, PASSWD)
-    profile_logged(session_id)
-    log_out(session_id)
-    reset_token = reset_password_token(EMAIL)
-    update_password(EMAIL, reset_token, NEW_PASSWD)
-    log_in(EMAIL, NEW_PASSWD)
+    i = 0
+    while i < 9:
+        if i == 0:
+            register_user(EMAIL, PASSWD)
+        elif i == 1:
+            log_in_wrong_password(EMAIL, NEW_PASSWD)
+        elif i == 2:
+            profile_unlogged()
+        elif i == 3:
+            session_id = log_in(EMAIL, PASSWD)
+        elif i == 4:
+            profile_logged(session_id)
+        elif i == 5:
+            log_out(session_id)
+        elif i == 6:
+            reset_token = reset_password_token(EMAIL)
+        elif i == 7:
+            update_password(EMAIL, reset_token, NEW_PASSWD)
+        elif i == 8:
+            log_in(EMAIL, NEW_PASSWD)
+        i += 1
