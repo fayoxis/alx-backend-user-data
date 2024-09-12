@@ -8,6 +8,7 @@ PASSWD = "b4l0u"
 NEW_PASSWD = "t4rt1fl3tt3"
 BASE_URL = "http://0.0.0.0:5000"
 
+
 def register_user(email: str, password: str) -> None:
     """Tests registering a user.
     """
