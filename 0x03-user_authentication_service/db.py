@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""DB module.
+"""Module for interacting with a database.
 """
 from sqlalchemy import create_engine, tuple_
 from sqlalchemy.exc import InvalidRequestError
@@ -12,11 +12,11 @@ from user import Base, User
 
 
 class DB:
-    """DB class.
+    """Class for managing database operations.
     """
 
     def __init__(self) -> None:
-        """Initialize a new DB instance.
+        """Set up the database engine and create tables.
         """
         self._engine = create_engine("sqlite:///a.db", echo=False)
         Base.metadata.drop_all(self._engine)
@@ -25,7 +25,7 @@ class DB:
 
     @property
     def _session(self) -> Session:
-        """Memoized session object.
+        """Create a new session if none exists.
         """
         if self.__session is None:
             DBSession = sessionmaker(bind=self._engine)
@@ -33,7 +33,7 @@ class DB:
         return self.__session
 
     def add_user(self, email: str, hashed_password: str) -> User:
-        """Adds a new user to the database.
+        """Add a new user to the database.
         """
         new_user = None
         while True:
@@ -47,7 +47,7 @@ class DB:
         return new_user
 
     def find_user_by(self, **kwargs) -> User:
-        """Finds a user based on a set of filters.
+        """Find a user based on given filters.
         """
         fields, values = [], []
         for key, value in kwargs.items():
@@ -70,7 +70,7 @@ class DB:
         return result
 
     def update_user(self, user_id: int, **kwargs) -> None:
-        """Updates a user based on a given id.
+        """Update user details based on the given id.
         """
         user = self.find_user_by(id=user_id)
         if user is None:
