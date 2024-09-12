@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""A simple end-to-end (E2E) integration test for `app.py`.
+"""End-to-end integration test suite for the user
+management API. This script tests various
+functionalities including user registration,
+authentication, profile management, and password reset.
 """
 import requests
 
@@ -11,7 +14,9 @@ BASE_URL = "http://0.0.0.0:5000"
 
 
 def register_user(email: str, password: str) -> None:
-    """Tests registering a user.
+    """Attempts to register a new user and
+    verifies the response. Also checks for proper
+    handling of duplicate registration attempts.
     """
     url = "{}/users".format(BASE_URL)
     body = {
@@ -27,7 +32,9 @@ def register_user(email: str, password: str) -> None:
 
 
 def log_in_wrong_password(email: str, password: str) -> None:
-    """Tests logging in with a wrong password.
+    """Attempts to log in with an incorrect
+    password and verifies that the server
+    responds with the appropriate error.
     """
     url = "{}/sessions".format(BASE_URL)
     body = {
@@ -39,7 +46,10 @@ def log_in_wrong_password(email: str, password: str) -> None:
 
 
 def log_in(email: str, password: str) -> str:
-    """Tests logging in.
+    """Attempts to log in with correct credentials
+    and verifies that the server responds with
+    a successful login message. Returns the
+    session ID for further authenticated requests.
     """
     url = "{}/sessions".format(BASE_URL)
     body = {
@@ -53,7 +63,8 @@ def log_in(email: str, password: str) -> str:
 
 
 def profile_unlogged() -> None:
-    """Tests retrieving profile information whilst logged out.
+    """Attempts to access the user profile without being
+    logged in and verifies that the server denies access.
     """
     url = "{}/profile".format(BASE_URL)
     res = requests.get(url)
@@ -61,7 +72,9 @@ def profile_unlogged() -> None:
 
 
 def profile_logged(session_id: str) -> None:
-    """Tests retrieving profile information whilst logged in.
+    """Attempts to access the user profile while
+    logged in and verifies that the server provides
+    the profile information..
     """
     url = "{}/profile".format(BASE_URL)
     req_cookies = {
@@ -73,7 +86,9 @@ def profile_logged(session_id: str) -> None:
 
 
 def log_out(session_id: str) -> None:
-    """Tests logging out of a session.
+    """Attempts to log out of an active session and
+    verifies that the server responds with a
+    logout confirmation
     """
     url = "{}/sessions".format(BASE_URL)
     req_cookies = {
@@ -85,7 +100,9 @@ def log_out(session_id: str) -> None:
 
 
 def reset_password_token(email: str) -> str:
-    """Tests requesting a password reset.
+    """Requests a password reset token for a
+    given email and verifies that the server
+    provides a valid reset token..
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {'email': email}
@@ -98,7 +115,9 @@ def reset_password_token(email: str) -> str:
 
 
 def update_password(email: str, reset_token: str, new_password: str) -> None:
-    """Tests updating a user's password.
+    """Attempts to update the user's password
+    using a reset token and verifies that the
+    server confirms the password change.
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {
@@ -111,7 +130,7 @@ def update_password(email: str, reset_token: str, new_password: str) -> None:
     assert res.json() == {"email": email, "message": "Password updated"}
 
 
-if __name__ == "__main__":
+while __name__ == "__main__":
     tests = [
         lambda: register_user(EMAIL, PASSWD),
         lambda: log_in_wrong_password(EMAIL, NEW_PASSWD),
