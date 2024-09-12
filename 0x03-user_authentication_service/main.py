@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""A simple end-to-end integration
-test for the `app.py` application.
+"""A simple end-to-end (E2E) integration test for `app.py`.
 """
 import requests
+
 
 EMAIL = "guillaume@holberton.io"
 PASSWD = "b4l0u"
 NEW_PASSWD = "t4rt1fl3tt3"
 BASE_URL = "http://0.0.0.0:5000"
 
+
 def register_user(email: str, password: str) -> None:
-    """Register a new user with the
-    provided email and password.
+    """Tests registering a user.
     """
     url = "{}/users".format(BASE_URL)
     body = {
@@ -25,8 +25,10 @@ def register_user(email: str, password: str) -> None:
     assert res.status_code == 400
     assert res.json() == {"message": "email already registered"}
 
+
 def log_in_wrong_password(email: str, password: str) -> None:
-    """Attempt to log in with the wrong password."""
+    """Tests logging in with a wrong password.
+    """
     url = "{}/sessions".format(BASE_URL)
     body = {
         'email': email,
@@ -35,8 +37,10 @@ def log_in_wrong_password(email: str, password: str) -> None:
     res = requests.post(url, data=body)
     assert res.status_code == 401
 
+
 def log_in(email: str, password: str) -> str:
-    """Log in with the provided email and password."""
+    """Tests logging in.
+    """
     url = "{}/sessions".format(BASE_URL)
     body = {
         'email': email,
@@ -47,16 +51,17 @@ def log_in(email: str, password: str) -> str:
     assert res.json() == {"email": email, "message": "logged in"}
     return res.cookies.get('session_id')
 
+
 def profile_unlogged() -> None:
-    """Attempt to access the
-    user profile while not logged in.
+    """Tests retrieving profile information whilst logged out.
     """
     url = "{}/profile".format(BASE_URL)
     res = requests.get(url)
     assert res.status_code == 403
 
+
 def profile_logged(session_id: str) -> None:
-    """Access the user profile while logged in.
+    """Tests retrieving profile information whilst logged in.
     """
     url = "{}/profile".format(BASE_URL)
     req_cookies = {
@@ -66,8 +71,9 @@ def profile_logged(session_id: str) -> None:
     assert res.status_code == 200
     assert "email" in res.json()
 
+
 def log_out(session_id: str) -> None:
-    """Log out of the current session.
+    """Tests logging out of a session.
     """
     url = "{}/sessions".format(BASE_URL)
     req_cookies = {
@@ -77,8 +83,9 @@ def log_out(session_id: str) -> None:
     assert res.status_code == 200
     assert res.json() == {"message": "Bienvenue"}
 
+
 def reset_password_token(email: str) -> str:
-    """Request a password reset token for the provided email.
+    """Tests requesting a password reset.
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {'email': email}
@@ -89,8 +96,9 @@ def reset_password_token(email: str) -> str:
     assert "reset_token" in res.json()
     return res.json().get('reset_token')
 
+
 def update_password(email: str, reset_token: str, new_password: str) -> None:
-    """Update the user's password using the reset token.
+    """Tests updating a user's password.
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {
@@ -102,25 +110,29 @@ def update_password(email: str, reset_token: str, new_password: str) -> None:
     assert res.status_code == 200
     assert res.json() == {"email": email, "message": "Password updated"}
 
+
 if __name__ == "__main__":
+    tests = [
+        lambda: register_user(EMAIL, PASSWD),
+        lambda: log_in_wrong_password(EMAIL, NEW_PASSWD),
+        lambda: profile_unlogged(),
+        lambda: log_in(EMAIL, PASSWD),
+        lambda: profile_logged(session_id),
+        lambda: log_out(session_id),
+        lambda: reset_password_token(EMAIL),
+        lambda: update_password(EMAIL, reset_token, NEW_PASSWD),
+        lambda: log_in(EMAIL, NEW_PASSWD)
+    ]
+
     i = 0
-    while i < 9:
-        if i == 0:
-            register_user(EMAIL, PASSWD)
-        elif i == 1:
-            log_in_wrong_password(EMAIL, NEW_PASSWD)
-        elif i == 2:
-            profile_unlogged()
-        elif i == 3:
-            session_id = log_in(EMAIL, PASSWD)
-        elif i == 4:
-            profile_logged(session_id)
-        elif i == 5:
-            log_out(session_id)
+    session_id = None
+    reset_token = None
+
+    while i < len(tests):
+        if i == 3:
+            session_id = tests[i]()
         elif i == 6:
-            reset_token = reset_password_token(EMAIL)
-        elif i == 7:
-            update_password(EMAIL, reset_token, NEW_PASSWD)
-        elif i == 8:
-            log_in(EMAIL, NEW_PASSWD)
+            reset_token = tests[i]()
+        else:
+            tests[i]()
         i += 1
