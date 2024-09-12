@@ -3,8 +3,10 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
+
 # Create a base class for declarative class definitions
 Base = declarative_base()
+
 
 class User(Base):
     """Represents a user record in the database.
