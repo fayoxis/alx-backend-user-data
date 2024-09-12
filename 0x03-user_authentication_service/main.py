@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""A simple end-to-end (E2E) integration test for `app.py`.
+"""A simple end-to-end integration
+test for the `app.py` application.
 """
 import requests
 
@@ -8,9 +9,9 @@ PASSWD = "b4l0u"
 NEW_PASSWD = "t4rt1fl3tt3"
 BASE_URL = "http://0.0.0.0:5000"
 
-
 def register_user(email: str, password: str) -> None:
-    """Tests registering a user.
+    """Register a new user with the
+    provided email and password.
     """
     url = "{}/users".format(BASE_URL)
     body = {
@@ -25,8 +26,7 @@ def register_user(email: str, password: str) -> None:
     assert res.json() == {"message": "email already registered"}
 
 def log_in_wrong_password(email: str, password: str) -> None:
-    """Tests logging in with a wrong password.
-    """
+    """Attempt to log in with the wrong password."""
     url = "{}/sessions".format(BASE_URL)
     body = {
         'email': email,
@@ -36,8 +36,7 @@ def log_in_wrong_password(email: str, password: str) -> None:
     assert res.status_code == 401
 
 def log_in(email: str, password: str) -> str:
-    """Tests logging in.
-    """
+    """Log in with the provided email and password."""
     url = "{}/sessions".format(BASE_URL)
     body = {
         'email': email,
@@ -49,14 +48,15 @@ def log_in(email: str, password: str) -> str:
     return res.cookies.get('session_id')
 
 def profile_unlogged() -> None:
-    """Tests retrieving profile information whilst logged out.
+    """Attempt to access the
+    user profile while not logged in.
     """
     url = "{}/profile".format(BASE_URL)
     res = requests.get(url)
     assert res.status_code == 403
 
 def profile_logged(session_id: str) -> None:
-    """Tests retrieving profile information whilst logged in.
+    """Access the user profile while logged in.
     """
     url = "{}/profile".format(BASE_URL)
     req_cookies = {
@@ -67,7 +67,7 @@ def profile_logged(session_id: str) -> None:
     assert "email" in res.json()
 
 def log_out(session_id: str) -> None:
-    """Tests logging out of a session.
+    """Log out of the current session.
     """
     url = "{}/sessions".format(BASE_URL)
     req_cookies = {
@@ -78,7 +78,7 @@ def log_out(session_id: str) -> None:
     assert res.json() == {"message": "Bienvenue"}
 
 def reset_password_token(email: str) -> str:
-    """Tests requesting a password reset.
+    """Request a password reset token for the provided email.
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {'email': email}
@@ -90,7 +90,7 @@ def reset_password_token(email: str) -> str:
     return res.json().get('reset_token')
 
 def update_password(email: str, reset_token: str, new_password: str) -> None:
-    """Tests updating a user's password.
+    """Update the user's password using the reset token.
     """
     url = "{}/reset_password".format(BASE_URL)
     body = {
