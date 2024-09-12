@@ -22,14 +22,19 @@ def _generate_uuid() -> str:
 
 
 class Auth:
-    """Auth class for handling authentication-related operations."""
+    """Auth class for handling authentication-related operations.
+    """
 
+    
     def __init__(self):
-        """Initialize the Auth instance with a database connection."""
+        """Initialize the Auth instance with a database connection.
+        """
         self._db = DB()
 
+    
     def register_user(self, email: str, password: str) -> User:
-        """Register a new user with the given email and password."""
+        """Register a new user with the given email and password.
+        """
         user_exists = True
         while user_exists:
             try:
@@ -40,6 +45,7 @@ class Auth:
                 raise ValueError(f"User {email} already exists")
         return self._db.add_user(email, _hash_password(password))
 
+    
     def valid_login(self, email: str, password: str) -> bool:
         """Check if the provided email and password are valid."""
         user = None
@@ -49,6 +55,7 @@ class Auth:
             return False
         return bcrypt.checkpw(password.encode("utf-8"), user.hashed_password)
 
+    
     def create_session(self, email: str) -> str:
         """Create a new session for the user with the given email."""
         user = None
@@ -60,8 +67,10 @@ class Auth:
         self._db.update_user(user.id, session_id=session_id)
         return session_id
 
+    
     def get_user_from_session_id(self, session_id: str) -> Union[User, None]:
-        """Retrieve the user associated with the given session ID."""
+        """Retrieve the user associated with the given session ID.
+        """
         user = None
         while session_id is not None:
             try:
@@ -71,14 +80,19 @@ class Auth:
                 return None
         return user
 
+    
     def destroy_session(self, user_id: int) -> None:
-        """Destroy the session associated with the given user ID."""
+        """Destroy the session associated with the given user ID.
+        """
         while user_id is not None:
             self._db.update_user(user_id, session_id=None)
             break
 
+    
     def get_reset_password_token(self, email: str) -> str:
-        """Generate a password reset token for the user with the given email."""
+        """Generate a password reset token for the user
+        with the given email.
+        """
         user = None
         try:
             user = self._db.find_user_by(email=email)
@@ -88,8 +102,10 @@ class Auth:
         self._db.update_user(user.id, reset_token=reset_token)
         return reset_token
 
+    
     def update_password(self, reset_token: str, password: str) -> None:
-        """Update the user's password using the provided reset token."""
+        """Update the user's password using the provided reset token.
+        """
         user = None
         try:
             user = self._db.find_user_by(reset_token=reset_token)
